@@ -1,19 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:weightSum="1">
 
 
+
     <ImageView
-        android:layout_width="match_parent"
+        android:layout_width="368dp"
         android:layout_height="255dp"
         android:id="@+id/imageView"
         android:src="@drawable/image1"
         android:adjustViewBounds="true"
-        android:layout_weight="0.95" />
+        android:visibility="visible"
+        android:layout_weight="0.95"
+        tools:layout_editor_absoluteY="81dp"
+        tools:layout_editor_absoluteX="8dp" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="368dp"
+        android:layout_height="255dp"
+        android:layout_weight="0.95"
+        android:adjustViewBounds="true"
+        android:visibility="invisible"
+        android:src="@drawable/image2"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="81dp" />
+
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -31,6 +48,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="戻る"
+            android:enabled="false"
             android:id="@+id/pause_button"/>
 
         <Button
