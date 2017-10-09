@@ -23,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
     ContentResolver resolver;
     Cursor cursor;
     ImageView imageVIew;
-    int index;
     Timer mTimer;
     Handler mHandler = new Handler();
     Button nextButton;
@@ -47,13 +46,9 @@ public class MainActivity extends AppCompatActivity {
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(index == 2) {
-                    index = 0;
-                } else {
-                    ++index;
+                nextCursor();
+                showImage();
                 }
-                slideContentsInfo(index);
-            }
         });
 
         // 戻るボタン
@@ -61,12 +56,8 @@ public class MainActivity extends AppCompatActivity {
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(index == 0) {
-                    index = 2;
-                } else {
-                    --index;
-                }
-                slideContentsInfo(index);
+                prevCursor();
+                showImage();
             }
         });
 
@@ -76,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // 再生ボタンを押下
-                if(playFlg == false) {
+                if (playFlg == false) {
                     playButton.setText("停止");
                     nextButton.setEnabled(false);
                     backButton.setEnabled(false);
@@ -87,16 +78,11 @@ public class MainActivity extends AppCompatActivity {
                     mTimer.schedule(new TimerTask() {
                         @Override
                         public void run() {
-                            if(index == 2) {
-                                index = 0;
-                            } else {
-                                ++index;
-                            }
-
+                            nextCursor();
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    slideContentsInfo(index);
+                                    showImage();
                                 }
                             });
                         }
@@ -104,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
                     playFlg = true;
 
-                // 停止ボタンを押下
+                    // 停止ボタンを押下
                 } else {
                     mTimer.cancel();
                     playFlg = false;
@@ -112,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
                     nextButton.setEnabled(true);
                     backButton.setEnabled(true);
                 }
-
             }
         });
 
@@ -138,10 +123,20 @@ public class MainActivity extends AppCompatActivity {
             case PERMISSIONS_REQUEST_CODE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     getContentsInfo();
+                } else {
+                    finish();
                 }
                 break;
             default:
                 break;
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(cursor != null) {
+            cursor.close();
         }
     }
 
@@ -157,28 +152,39 @@ public class MainActivity extends AppCompatActivity {
                 null // ソート (null ソートなし)
         );
 
+        // 最初の画像を表示
+
         if (cursor.moveToFirst()) {
-
-            int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-            Long id = cursor.getLong(fieldIndex);
-            Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-
-            imageVIew = (ImageView) findViewById(R.id.imageView);
-            imageVIew.setImageURI(imageUri);
-        }
-//        cursor.close();
-    }
-
-    private void slideContentsInfo(int param) {
-
-        if (cursor.moveToPosition(param)) {
-            int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-            Long id = cursor.getLong(fieldIndex);
-            Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-
-            imageVIew = (ImageView) findViewById(R.id.imageView);
-            imageVIew.setImageURI(imageUri);
+            showImage();
+        } else {
+            nextButton.setEnabled(false);
+            backButton.setEnabled(false);
+            playButton.setEnabled(false);
         }
 
+
     }
+
+    private void showImage() {
+        int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
+        Long id = cursor.getLong(fieldIndex);
+        Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+
+        imageVIew = (ImageView) findViewById(R.id.imageView);
+        imageVIew.setImageURI(imageUri);
+    }
+
+
+    private void nextCursor() {
+        if(!cursor.moveToNext()) {
+            cursor.moveToFirst();
+        }
+    }
+
+    private void prevCursor() {
+        if(!cursor.moveToPrevious()) {
+            cursor.moveToLast();
+        }
+    }
+
 }
